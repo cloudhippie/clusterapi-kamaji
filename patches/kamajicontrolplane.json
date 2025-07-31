@@ -1,0 +1,18 @@
+[
+  {
+    "op": "add",
+    "path": "/metadata/name",
+    "value": "${CLUSTER_NAME}-control-plane"
+  },
+  {
+    "op": "remove",
+    "path": "/metadata/namespace"
+  },
+  {
+    "op": "add",
+    "path": "/spec/deployment/affinity/podAntiAffinity/preferredDuringSchedulingIgnoredDuringExecution/0/podAffinityTerm/labelSelector/matchExpressions/0/values",
+    "value": [
+      "${CLUSTER_NAME}"
+    ]
+  }
+]
