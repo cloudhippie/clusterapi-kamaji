@@ -285,7 +285,6 @@ spec:
         - echo 'source <(kubectl completion bash)' >>/root/.bashrc
         - echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >>/root/.bashrc
         - apt-get -y autoremove && apt-get -y clean all
-        - sysctl --system
         - echo "KUBELET_EXTRA_ARGS=--node-ip=$(curl -sSL -4 ifconfig.me | head -n1),$(curl -sSL -6 ifconfig.me | head -n1)" > /etc/default/kubelet
 
 ...

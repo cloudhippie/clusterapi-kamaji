@@ -24,11 +24,6 @@
   {
     "op": "add",
     "path": "/spec/template/spec/preKubeadmCommands/-",
-    "value": "sysctl --system"
-  },
-  {
-    "op": "add",
-    "path": "/spec/template/spec/preKubeadmCommands/-",
     "value": "echo \"KUBELET_EXTRA_ARGS=--node-ip=$(curl -sSL -4 ifconfig.me | head -n1),$(curl -sSL -6 ifconfig.me | head -n1)\" > /etc/default/kubelet"
   }
 ]
