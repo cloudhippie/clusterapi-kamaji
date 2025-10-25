@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/cloudhippie/clusterapi-kamaji/compare/v1.1.0...v1.1.1) (2025-10-25)
+
+
+### Bugfixes
+
+* sysctl command gets already executed ([56c1f63](https://github.com/cloudhippie/clusterapi-kamaji/commit/56c1f6383788eaa4c80d5f9ece54a2aca5de8fd5))
+
 ## [1.1.0](https://github.com/cloudhippie/clusterapi-kamaji/compare/v1.0.0...v1.1.0) (2025-10-25)
 
 
