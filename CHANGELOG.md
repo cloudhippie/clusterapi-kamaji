@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/cloudhippie/clusterapi-kamaji/compare/v1.1.1...v1.2.0) (2025-11-17)
+
+
+### Features
+
+* drop worker placement group ([f3a0043](https://github.com/cloudhippie/clusterapi-kamaji/commit/f3a0043eaa28f1d84d466fb3abac6932cd0d6255))
+
 ## [1.1.1](https://github.com/cloudhippie/clusterapi-kamaji/compare/v1.1.0...v1.1.1) (2025-10-25)
 
 
