@@ -2,9 +2,9 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: ${CLUSTER_NAME}
   labels:
     cluster: ${CLUSTER_NAME}
+  name: ${CLUSTER_NAME}
 spec:
   clusterNetwork:
     pods:
@@ -53,9 +53,9 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: HetznerCluster
 metadata:
-  name: ${CLUSTER_NAME}
   annotations:
     capi.syself.com/allow-empty-control-plane-address: "true"
+  name: ${CLUSTER_NAME}
 spec:
   controlPlaneLoadBalancer:
     enabled: false
@@ -71,10 +71,10 @@ spec:
       hetznerRobotPassword: robot-password
       hetznerRobotUser: robot-user
     name: hetzner
+  skipCreatingHetznerSecretInWorkloadCluster: true
   sshKeys:
     hcloud:
       - name: ${SSH_KEY_NAME}
-  skipCreatingHetznerSecretInWorkloadCluster: true
 
 ...
 ---
@@ -83,9 +83,12 @@ kind: KamajiControlPlane
 metadata:
   name: ${CLUSTER_NAME}-control-plane
 spec:
-  replicas: ${CONTROL_PLANE_MACHINE_COUNT}
-  version: ${KUBERNETES_VERSION}
-  dataStoreName: default
+  addons:
+    coreDNS:
+      dnsServiceIPs:
+        - 10.96.0.10
+    konnectivity: {}
+    kubeProxy: {}
   apiServer:
     extraArgs:
       - --oidc-client-id=kubernetes
@@ -96,13 +99,20 @@ spec:
   controllerManager:
     extraArgs:
       - --cloud-provider=external
-  scheduler: {}
-  addons:
-    konnectivity: {}
-    kubeProxy: {}
-    coreDNS:
-      dnsServiceIPs:
-        - 10.96.0.10
+  dataStoreName: default
+  deployment:
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: kamaji.clastix.io/name
+                    operator: In
+                    values:
+                      - ${CLUSTER_NAME}
+              topologyKey: kubernetes.io/hostname
+            weight: 100
   kubelet:
     cgroupfs: systemd
     preferredAddressTypes:
@@ -111,26 +121,16 @@ spec:
       - Hostname
   network:
     certSANs: []
-    serviceType: LoadBalancer
     serviceAnnotations:
       external-dns.alpha.kubernetes.io/ttl: "1"
-      load-balancer.hetzner.cloud/use-private-ip: "true"
       load-balancer.hetzner.cloud/disable-private-ingress: "true"
-      load-balancer.hetzner.cloud/type: lb11
       load-balancer.hetzner.cloud/network-zone: eu-central
-  deployment:
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              topologyKey: kubernetes.io/hostname
-              labelSelector:
-                matchExpressions:
-                  - key: kamaji.clastix.io/name
-                    operator: In
-                    values:
-                      - ${CLUSTER_NAME}
+      load-balancer.hetzner.cloud/type: lb11
+      load-balancer.hetzner.cloud/use-private-ip: "true"
+    serviceType: LoadBalancer
+  replicas: ${CONTROL_PLANE_MACHINE_COUNT}
+  scheduler: {}
+  version: ${KUBERNETES_VERSION}
 
 ...
 ---
@@ -224,11 +224,11 @@ spec:
           owner: root:root
           path: /etc/systemd/system/containerd.service
           permissions: "0744"
-        - path: /etc/sysctl.d/99-fsnotify.conf
-          content: |-
+        - content: |-
             fs.inotify.max_user_instances = 8192
             fs.inotify.max_user_watches = 1048576
             fs.inotify.max_queued_events = 65536
+          path: /etc/sysctl.d/99-fsnotify.conf
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs:
@@ -289,8 +289,8 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   labels:
-    nodepool: ${CLUSTER_NAME}-fsn1
     cluster: ${CLUSTER_NAME}
+    nodepool: ${CLUSTER_NAME}-fsn1
   name: ${CLUSTER_NAME}-fsn1
 spec:
   clusterName: ${CLUSTER_NAME}
@@ -300,8 +300,8 @@ spec:
   template:
     metadata:
       labels:
-        nodepool: ${CLUSTER_NAME}-fsn1
         cluster: ${CLUSTER_NAME}
+        nodepool: ${CLUSTER_NAME}-fsn1
     spec:
       bootstrap:
         configRef:
@@ -322,8 +322,8 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   labels:
-    nodepool: ${CLUSTER_NAME}-hel1
     cluster: ${CLUSTER_NAME}
+    nodepool: ${CLUSTER_NAME}-hel1
   name: ${CLUSTER_NAME}-hel1
 spec:
   clusterName: ${CLUSTER_NAME}
@@ -333,8 +333,8 @@ spec:
   template:
     metadata:
       labels:
-        nodepool: ${CLUSTER_NAME}-hel1
         cluster: ${CLUSTER_NAME}
+        nodepool: ${CLUSTER_NAME}-hel1
     spec:
       bootstrap:
         configRef:
@@ -355,8 +355,8 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   labels:
-    nodepool: ${CLUSTER_NAME}-nbg1
     cluster: ${CLUSTER_NAME}
+    nodepool: ${CLUSTER_NAME}-nbg1
   name: ${CLUSTER_NAME}-nbg1
 spec:
   clusterName: ${CLUSTER_NAME}
@@ -366,8 +366,8 @@ spec:
   template:
     metadata:
       labels:
-        nodepool: ${CLUSTER_NAME}-nbg1
         cluster: ${CLUSTER_NAME}
+        nodepool: ${CLUSTER_NAME}-nbg1
     spec:
       bootstrap:
         configRef:
